@@ -1,0 +1,15 @@
+{
+  "name": "nodejs_api_vid_first",
+  "version": "1.0.0",
+  "description": "Bir alışveriş merkezi apisi similasyonu",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Batuhan",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
