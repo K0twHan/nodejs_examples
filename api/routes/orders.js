@@ -16,4 +16,19 @@ router.get("/:orderId",(req,res,next)=>{
     })
 })
 
+
+
+router.post("/:orderId",(req,res,next)=>{
+    const order = {
+        orderName : req.body.orderName,
+        orderPrice : req.body.orderPrice
+    }
+    res.status(201).json({
+
+        message : "sipariş alındı",
+        orderId : req.params.orderId,
+        Order : order
+    })
+})
+
 module.exports = router

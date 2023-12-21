@@ -1,43 +1,83 @@
 const express = require('express');
 const router = express.Router();
+const Product = require('../models/product')
+const mongoose = require('mongoose');
+
+
 
 router.get("/",(req,res,next)=>{
-    res.status(200).json({
-        message : "products router get kısmı"
+    Product.find()
+    .exec()
+    .then(docs =>{
+        console.log(docs);
+        res.status(200).json(docs)
+    })
+    .catch(err =>{
+        console.log(err);
+        res.status(500).json(err);
     })
 });
 
 router.post("/",(req,res,next)=>{
-    res.status(200).json({
-        message : "products router post kısmı"
+    const product = new Product({
+        _id : new mongoose.Types.ObjectId,
+        name: req.body.name,
+        price : req.body.price
+    });
+    product.save().then(result => {
+        console.log(result);
+    }).catch(err => {console.log(err);
+    res.status(500).json({error: err})});
+
+
+    res.status(201).json({
+        message : "products router post kısmı",
+        createdProduct: product
     })
 });
 
 router.get("/:productId",(req,res,next)=>{
     const id = req.params.productId;
-    if(id === "special")
-    {
-        res.status(200).json({
-            message: "Özel idye özel mesaj"
+    Product.findById(id)
+    .exec()
+    .then(doc =>{
+        console.log(doc);
+        res.status(200).json(doc)
+    }).catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
         })
-    }
-    else{
-        res.status(200).json({
-            message : "belirttiğiniz idnin mesajı"
-        })
-    }
+    })
 })
 
 router.patch("/:productId",(req,res,next)=>{
-    res.status(200).json({
-        message : "ürün güncellendi"
+    const id = req.params.productId
+    const updateOps = {};
+    for(const ops of req.body) 
+    {
+        updateOps[ops.propName] = ops.value
+    }
+    Product.updateOne({_id : id},{$set : updateOps}).exec().then(result => {
+        res.status(200).json(result)
+    }).catch(err =>{
+        console.log(err);
+        res.status(500).json(err);
     })
 })
 
 router.delete("/:productId",(req,res,next)=>{
-    res.status(200).json({
-        message : "ürün silindi"
+    const id = req.params.productId;
+    Product.deleteOne({_id : id})
+    .exec()
+    .then(result => {
+        res.status(200).json(result);
+    })
+    .catch(err => {
+        console.log(err);
     })
 })
-
 module.exports = router;
+
+
+
