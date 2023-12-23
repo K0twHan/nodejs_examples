@@ -2,15 +2,58 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/product')
 const mongoose = require('mongoose');
+const multer = require('multer');
+const product = require('../models/product');
 
+const storage = multer.diskStorage({
+    destination : function(req, file , cb ) {
+        cb(null , './uploads/');
+    },
+    filename : function(req,file,cb) {
+        cb(null, new Date().toISOString().replace(/:/g,'-') + file.originalname);
+    }
+});
+
+const fileFilter = (req,file ,cb ) => {
+    // reject file
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png')
+    {
+        cb(null,true)
+
+    }
+    else{
+
+        cb(null,false)
+    }
+}
+
+const upload = multer({storage : storage, limits:  {
+    fileSize : 1024 * 1024 * 5
+},
+    fileFilter : fileFilter});     
 
 
 router.get("/",(req,res,next)=>{
-    Product.find()
+    Product.find().select("name price _id productImage")
     .exec()
     .then(docs =>{
-        console.log(docs);
-        res.status(200).json(docs)
+        const response = {
+            count: docs.length,
+            products: docs.map(doc => {
+                return {
+    
+                    name : doc.name,
+                    price : doc.price,
+                    productImage : doc.productImage,
+                    _id : doc._id,
+                    request : {
+                        type : "GET",
+                        url : "http://localhost:3000/product/" + doc._id
+                }
+                }
+            })
+        }
+     res.status(200).json(response)   
     })
     .catch(err =>{
         console.log(err);
@@ -18,31 +61,38 @@ router.get("/",(req,res,next)=>{
     })
 });
 
-router.post("/",(req,res,next)=>{
+router.post("/",upload.single('productImage'),(req,res,next)=>{
+    console.log(req.file)
     const product = new Product({
         _id : new mongoose.Types.ObjectId,
         name: req.body.name,
-        price : req.body.price
+        price : req.body.price,
+        productImage : req.file.path
     });
     product.save().then(result => {
         console.log(result);
+        res.status(200).json(result)
     }).catch(err => {console.log(err);
     res.status(500).json({error: err})});
 
-
-    res.status(201).json({
-        message : "products router post kısmı",
-        createdProduct: product
-    })
 });
 
 router.get("/:productId",(req,res,next)=>{
     const id = req.params.productId;
-    Product.findById(id)
+    Product.findById(id).select("name price _id productImage")
     .exec()
     .then(doc =>{
-        console.log(doc);
-        res.status(200).json(doc)
+        console.log("veritabanından" , doc);
+        if(doc)
+        {
+            res.status(200).json({
+                product : doc,
+                request: {
+                    type : "GET",
+                    url : "http://localhost:3000/product"
+                }
+            })
+        }
     }).catch(err => {
         console.log(err);
         res.status(500).json({
