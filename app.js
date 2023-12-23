@@ -7,6 +7,7 @@ const dbConnect = require('./config/dbConnection')
 
 const productRoute = require("./api/routes/products");
 const ordersRoute = require("./api/routes/orders");
+const userRoute = require('./api/routes/users');
 
 //app.use(express.json);
 app.use(morgan('dev'));
@@ -30,6 +31,7 @@ app.use((req,res,next)=>{
 
 app.use("/product",productRoute);
 app.use("/order",ordersRoute);
+app.use("/user",userRoute);
 
 
 app.use((req,res,next)=>{
