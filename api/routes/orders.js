@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const mongoose = require('mongoose')
-
+const checkAuth = require('../middleware/check-auth')
 const Order = require('../models/order')
 
 
-router.get("/",(req,res,next)=>{
+router.get("/",checkAuth,(req,res,next)=>{
     Order.find().select("_id product quantity")
     .exec()
     .then(docs => {
@@ -29,7 +29,7 @@ router.get("/",(req,res,next)=>{
     })
 })
 
-router.get("/:orderId",(req,res,next)=>{
+router.get("/:orderId",checkAuth,(req,res,next)=>{
     res.status(200).json({
 
         message : "sipariş alındı",
@@ -39,7 +39,7 @@ router.get("/:orderId",(req,res,next)=>{
 
 
 
-router.post("/",(req,res,next)=>{
+router.post("/",checkAuth,(req,res,next)=>{
     const order = new Order({
         _id : new mongoose.Types.ObjectId(),
         quantity : req.body.quantity,
